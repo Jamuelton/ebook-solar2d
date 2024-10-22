@@ -21,16 +21,6 @@ function scene:create(event)
     )
     sceneGroup:insert(nextBtn)
 
-    local lastBtn = button.new(
-        display.contentCenterX + -300,
-        display.contentCenterY + 480,
-        "src/assets/controllers/lastButton.png",
-        function()
-            composer.gotoScene("src.pages.contraCapa")
-        end
-    )
-    sceneGroup:insert(lastBtn)
-
     local soundBtn = button.new(
         display.contentCenterX + 0,
         display.contentCenterY + 480,

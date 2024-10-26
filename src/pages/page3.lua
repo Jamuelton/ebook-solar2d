@@ -8,6 +8,8 @@ local currentIndex = 1
 
 local images = {}
 
+
+
 local function changeImage(sceneGroup, index)
    
     for i = 1, #images do
@@ -15,6 +17,14 @@ local function changeImage(sceneGroup, index)
     end
     
     images[index].isVisible = true
+end
+
+local function resetScene()
+    for i = 1, #images do
+        images[i].isVisible = false
+    end
+    
+    images[1].isVisible = true
 end
 
 local function onShake(e)
@@ -86,6 +96,13 @@ function scene:destroy(event)
     Runtime:removeEventListener("accelerometer", onShake)
 end
 
+function scene:show(event)
+    if event.phase == "will" then
+        resetScene()
+    end
+end
+
+scene:addEventListener("show", scene)
 scene:addEventListener("create", scene)
 scene:addEventListener("destroy", scene)
 

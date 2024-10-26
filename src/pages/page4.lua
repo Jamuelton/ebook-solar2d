@@ -2,7 +2,59 @@ local composer = require("composer")
 
 local scene = composer.newScene()
 
+local physics = require("physics")
+
 local button = require("src.components.button")
+
+physics.start()
+physics.setGravity(0, 0)
+
+local infect
+local people = {}
+local locations = {}
+
+local minX, maxX = 50, display.contentWidth - 50 
+local minY, maxY = display.contentCenterY + 50, display.contentHeight - 100 
+
+local function moveInfect()
+    local randomX = math.random(minX, maxX)
+    local randomY = math.random(minY, maxY)
+    transition.to(infect, {
+        x = randomX,
+        y = randomY,
+        time = 1500,
+        onComplete = moveInfect
+    })
+end
+
+local function onCollide(event)
+    if event.phase == "began" then
+        local obj1 = event.object1
+        local obj2 = event.object2
+
+        
+        if (obj1 == infect and obj2.isPerson) or (obj2 == infect and obj1.isPerson) then
+            local person = obj1.isPerson and obj1 or obj2
+            person.fill = { type = "image", filename = "src/assets/page4/infectado.png"}
+            person.isPerson = false 
+
+        
+        elseif (obj1 == infect and obj2.isLocation) or (obj2 == infect and obj1.isLocation) then
+            local location = obj1.isLocation and obj1 or obj2
+
+            
+            if location.name == "school" then
+                location.fill = { type = "image", filename = "src/assets/page4/escolafechado.png" }
+            elseif location.name == "hospital" then
+                location.fill = { type = "image", filename = "src/assets/page4/hospitalfechado.png" }
+            elseif location.name == "market" then
+                location.fill = { type = "image", filename = "src/assets/page4/mercadofechado.png" }
+            end
+
+            location.isLocation = false
+        end
+    end
+end
 
 function scene:create(event)
     local sceneGroup = self.view
@@ -10,6 +62,45 @@ function scene:create(event)
     local capa = display.newImageRect(sceneGroup, "src/assets/pages/pag4.png", 768, 1024)
     capa.x = display.contentCenterX
     capa.y = display.contentCenterY
+
+    infect = display.newImageRect(sceneGroup,"src/assets/page4/infectado.png",30,50 )
+    infect.x, infect.y = display.contentCenterX, display.contentCenterY + 300
+    physics.addBody(infect, "dynamic", { radius = 15 })
+    infect.isFixedRotation = true
+    infect.isSensor = true
+
+    for i = 1, 10 do
+        local person = display.newImageRect(sceneGroup, "src/assets/page4/normal.png", 30, 50)
+        person.x, person.y = math.random(minX, maxX), math.random(minY, maxY)
+        physics.addBody(person, "static", { radius = 15 })
+        person.isPerson = true
+        table.insert(people, person)
+    end
+
+    local school = display.newImageRect(sceneGroup, "src/assets/page4/escolaaberto.png", 120, 120)
+    school.x, school.y = display.contentCenterX + 300, display.contentCenterY + 380 
+    school.name = "school"
+    school.isLocation = true
+    physics.addBody(school, "static")
+    table.insert(locations, school)
+
+    local hospital = display.newImageRect(sceneGroup, "src/assets/page4/hospitalaberto.png", 120, 120)
+    hospital.x, hospital.y = display.contentCenterX - 300, display.contentCenterY + 380 
+    hospital.name = "hospital"
+    hospital.isLocation = true
+    physics.addBody(hospital, "static")
+    table.insert(locations, hospital)
+
+    local market = display.newImageRect(sceneGroup, "src/assets/page4/mercadoaberto.png", 120, 120)
+    market.x, market.y = display.contentCenterX , display.contentCenterY + 100
+    market.name = "market"
+    market.isLocation = true
+    physics.addBody(market, "static")
+    table.insert(locations, market)
+
+    moveInfect()
+
+    Runtime:addEventListener("collision", onCollide)
     
     local nextBtn = button.new(
         display.contentCenterX + 300,
@@ -43,6 +134,11 @@ function scene:create(event)
    
 end
 
+function scene:destroy(event)
+    Runtime:removeEventListener("collision", onCollide)
+end
+
 scene:addEventListener("create", scene)
+scene:addEventListener("destroy", scene)
 
 return scene

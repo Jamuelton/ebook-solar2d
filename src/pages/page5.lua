@@ -6,6 +6,18 @@ local button = require("src.components.button")
 
 local labImage, scientistImage, parkImage, centralImage
 
+
+local function resetScene()
+    labImage.isVisible = true
+    scientistImage.isVisible = true
+    parkImage.isVisible = true
+
+    if centralImage then
+        centralImage:removeSelf()
+        centralImage = nil
+    end
+end
+
 local function changeImage(image)
 
     labImage.isVisible = false
@@ -19,6 +31,7 @@ local function changeImage(image)
 
     centralImage = display.newImageRect(scene.view, image, 681, 265)
     centralImage.x, centralImage.y = display.contentCenterX, display.contentCenterY + 310
+    centralImage:addEventListener("touch", resetScene)
 end
 
 local function onTouch(event)
@@ -31,6 +44,8 @@ local function onTouch(event)
     end
     return true
 end
+
+
 
 function scene:create(event)
     local sceneGroup = self.view
@@ -82,6 +97,13 @@ function scene:create(event)
    
 end
 
+function scene:show(event)
+    if event.phase == "will" then
+        resetScene()
+    end
+end
+
 scene:addEventListener("create", scene)
+scene:addEventListener("show", scene)
 
 return scene

@@ -56,6 +56,29 @@ local function onCollide(event)
     end
 end
 
+local function resetScene()
+   
+    for _, person in ipairs(people) do
+        person.fill = {type = "image" , filename = "src/assets/page4/normal.png" }
+        person.isPerson = true
+    end
+
+   
+    for _, location in ipairs(locations) do
+        if location.name == "school" then
+            location.fill = { type = "image", filename = "src/assets/page4/escolaaberto.png" }
+        elseif location.name == "hospital" then
+            location.fill = { type = "image", filename = "src/assets/page4/hospitalaberto.png" }
+        elseif location.name == "market" then
+            location.fill = { type = "image", filename = "src/assets/page4/mercadoaberto.png" }
+        end
+        location.isLocation = true 
+    end
+
+    
+    infect.x, infect.y = display.contentCenterX, display.contentCenterY + 300
+end
+
 function scene:create(event)
     local sceneGroup = self.view
     
@@ -138,6 +161,14 @@ function scene:destroy(event)
     Runtime:removeEventListener("collision", onCollide)
 end
 
+function scene:show(event)
+    if event.phase == "will" then
+        resetScene()
+    end
+end
+
+
+scene:addEventListener("show", scene)
 scene:addEventListener("create", scene)
 scene:addEventListener("destroy", scene)
 

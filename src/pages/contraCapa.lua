@@ -21,15 +21,15 @@ function scene:create(event)
     )
     sceneGroup:insert(firstBtn)
 
-    local lastBtn = button.new(
+    local backBtn = button.new(
         display.contentCenterX + -300,
         display.contentCenterY + 480,
-        "src/assets/controllers/lastButton.png",
+        "src/assets/controllers/backButton.png",
         function()
-            composer.gotoScene("src.pages.page5")
+            composer.gotoScene("src.pages.page4")
         end
     )
-    sceneGroup:insert(lastBtn)
+    sceneGroup:insert(backBtn)
 
     local soundBtn = button.new(
         display.contentCenterX + 0,

@@ -64,6 +64,14 @@ local function onKeyPress(event)
     return true
 end
 
+local function resetScene()
+    for i = 1, #images do
+        images[i].isVisible = false
+    end
+    
+    images[1].isVisible = true
+end
+
 
 function scene:create(event)
     local sceneGroup = self.view
@@ -122,6 +130,13 @@ function scene:destroy(event)
     Runtime:removeEventListener("key", onKeyPress)
 end
 
+function scene:show(event)
+    if event.phase == "will" then
+        resetScene()
+    end
+end
+
+scene:addEventListener("show", scene)
 scene:addEventListener("create", scene)
 scene:addEventListener("destroy", scene)
 

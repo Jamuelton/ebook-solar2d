@@ -222,6 +222,7 @@ function scene:create(event)
 end
 
 function scene:destroy(e)
+    
     audio.stop()
     audio.dispose(backgroundMusic)
     backgroundMusic = nil
@@ -229,8 +230,15 @@ end
 
 function scene:hide(event)
     if event.phase == "will" then
-        audio.stop() 
-        isPlaying = false 
+        
+        audio.stop()
+        isPlaying = false
+
+    
+        if timelineFill then
+            timelineFill:removeSelf()
+            timelineFill = nil
+        end
     end
 end
 
@@ -240,10 +248,12 @@ function scene:show(event)
         currentIndex = 1
         changePeriod(currentIndex)
 
-        
+       
         if marker and points[1] then
             marker.x = points[1].x
         end
+
+        updateTimelineFill(marker.x)
     end
 end
 

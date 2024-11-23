@@ -1,0 +1,10 @@
+{
+  "Lua.diagnostics.globals": [
+    "display",
+    "Runtime",
+    "native",
+    "transition",
+    "audio",
+    "system"
+  ]
+}

@@ -68,7 +68,7 @@ end
 function scene:create(event)
     local sceneGroup = self.view
     
-    local capa = display.newImageRect(sceneGroup, "src/assets/pages/pag5.png", 768, 1024)
+    local capa = display.newImageRect(sceneGroup, "src/assets/pages/Pag5.png", 768, 1024)
     capa.x = display.contentCenterX
     capa.y = display.contentCenterY
 
@@ -127,7 +127,7 @@ end
 
 function scene:hide(event)
     if event.phase == "will" then
-        audio.stop(audioHandle) 
+        audio.stop() 
         isPlaying = false 
     end
 end

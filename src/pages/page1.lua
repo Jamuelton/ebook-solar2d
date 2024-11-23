@@ -1,3 +1,5 @@
+system.activate("multitouch")
+
 local composer = require("composer")
 
 local scene = composer.newScene()
@@ -35,52 +37,61 @@ local function changeImage(sceneGroup, index)
     images[index].isVisible = true
 end
 
--- local function onPinch(e)
+local ball
 
---     if e.phase == "moved" then
---         local dx = math.abs(e.x - e.xStart)
---         local dy = math.abs(e.y - e.yStart)
+local function onPinch(e)
 
---         if dx > 10 or dy > 10 then
---             if e.scale > 1.0 then
---                 if currenteIndex < #images then
---                     currenteIndex = currenteIndex + 1
---                 end
---
---                 changeImage(scene.view, currenteIndex)
---             elseif e.scale < 1.0 then
---                 if currenteIndex > 1 then
---                     currenteIndex = currenteIndex - 1    
---                 end
---
---                 changeImage(scene.view, currenteIndex)
+    if e.phase == "moved" then
+        local dx = math.abs(e.x - e.xStart)
+        local dy = math.abs(e.y - e.yStart)
+
+        
+
+        if dx > 10 and dy > 10 then
+            
+            if e.scale > 1.1 then
+                ball.isVisible = true
+                if currentIndex < #images then
+                    currentIndex = currentIndex + 1
+                end
+    
+                changeImage(scene.view, currentIndex)
+            elseif e.scale < 0.9 then
+                if currentIndex > 1 then
+                    currentIndex = currentIndex - 1
+                end
+    
+                changeImage(scene.view, currentIndex)
+            end
+        end
+    elseif e.phase == "ended" or e.phase == "cancelled" then
+        -- Esconde a bola vermelha quando o gesto termina
+        ball.isVisible = false
+    end
+
+    return true
+end 
+
+-- local function onKeyPress(event)
+--     if event.phase == "down" then
+--         if event.keyName == "up" then
+      
+--             if currentIndex < #images then
+--                 currentIndex = currentIndex + 1
 --             end
+
+--             changeImage(scene.view, currentIndex)
+--         elseif event.keyName == "down" then
+
+--             if currentIndex > 1 then
+--                 currentIndex = currentIndex - 1
+--             end
+
+--             changeImage(scene.view, currentIndex)
 --         end
 --     end
-
 --     return true
--- end 
-
-local function onKeyPress(event)
-    if event.phase == "down" then
-        if event.keyName == "up" then
-      
-            if currentIndex < #images then
-                currentIndex = currentIndex + 1
-            end
-
-            changeImage(scene.view, currentIndex)
-        elseif event.keyName == "down" then
-
-            if currentIndex > 1 then
-                currentIndex = currentIndex - 1
-            end
-
-            changeImage(scene.view, currentIndex)
-        end
-    end
-    return true
-end
+-- end
 
 local function resetScene()
     for i = 1, #images do
@@ -94,7 +105,7 @@ end
 function scene:create(event)
     local sceneGroup = self.view
     
-    local capa = display.newImageRect(sceneGroup, "src/assets/pages/pag1.png", 768, 1024)
+    local capa = display.newImageRect(sceneGroup, "src/assets/pages/Pag1.png", 768, 1024)
     capa.x = display.contentCenterX
     capa.y = display.contentCenterY
 
@@ -138,12 +149,16 @@ function scene:create(event)
     )
     sceneGroup:insert(soundBtn)
 
-    Runtime:addEventListener("key", onKeyPress)
+    ball = display.newCircle(sceneGroup, display.contentWidth - 50, 50, 20)
+    ball:setFillColor(0, 0, 1) -- Cor vermelha
+    ball.isVisible = false
+
+    Runtime:addEventListener("touch", onPinch)
    
 end
 
 function scene:destroy(event)
-    Runtime:removeEventListener("key", onKeyPress)
+    Runtime:removeEventListener("touch", onPinch)
     audio.stop()
     audio.dispose(backgroundMusic)
     backgroundMusic = nil
@@ -157,7 +172,7 @@ end
 
 function scene:hide(event)
     if event.phase == "will" then
-        audio.stop(audioHandle) 
+        audio.stop() 
         isPlaying = false 
     end
 end

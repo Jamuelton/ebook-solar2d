@@ -67,7 +67,7 @@ end
 
 function scene:hide(event)
     if event.phase == "will" then
-        audio.stop(audioHandle) 
+        audio.stop() 
         isPlaying = false 
     end
 end

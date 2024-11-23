@@ -1,13 +1,11 @@
 system.activate("multitouch")
 
 local composer = require("composer")
-
 local scene = composer.newScene()
 
 local button = require("src.components.button")
 
 local images = {}
-
 local currentIndex = 1
 
 local audioHandle
@@ -16,149 +14,144 @@ local isPlaying = false
 local backgroundMusic = audio.loadStream("src/assets/sounds/page1.mp3")
 
 local function toggleAudio()
-    if isPlaying == true then
-        audio.stop(audioHandle)    
+    if isPlaying then
+        audio.stop(audioHandle)
         backgroundMusic = nil
         isPlaying = false
     else
         backgroundMusic = audio.loadStream("src/assets/sounds/page1.mp3")
         audioHandle = audio.play(backgroundMusic)
         isPlaying = true
-        
     end
 end
 
 local function changeImage(sceneGroup, index)
-
     for i = 1, #images do
         images[i].isVisible = false
     end
-
     images[index].isVisible = true
 end
 
-local ball
+local finger1, finger2
+local initialDistance
+local isZooming = false
 
-local function onPinch(e)
+local function calculateDistance(x1, y1, x2, y2)
+    local dx = x2 - x1
+    local dy = y2 - y1
+    return math.sqrt(dx * dx + dy * dy)
+end
 
-    if e.phase == "moved" then
-        local dx = math.abs(e.x - e.xStart)
-        local dy = math.abs(e.y - e.yStart)
+local function onTouch(event)
+    if event.phase == "began" then
+        -- Registrar os toques iniciais como finger1 e finger2
+        if not finger1 then
+            finger1 = event
+        elseif not finger2 then
+            finger2 = event
+            isZooming = true
+            initialDistance = calculateDistance(finger1.x, finger1.y, finger2.x, finger2.y)
+        end
+    elseif event.phase == "moved" and isZooming then
+        -- Atualizar a posição de finger1 e finger2 durante o movimento
+        if finger1 and event.id == finger1.id then
+            finger1 = event
+        elseif finger2 and event.id == finger2.id then
+            finger2 = event
+        end
 
-        
+        -- Verificar se finger1 e finger2 estão definidos antes de calcular a distância
+        if finger1 and finger2 then
+            local currentDistance = calculateDistance(finger1.x, finger1.y, finger2.x, finger2.y)
+            local scale = currentDistance / initialDistance
 
-        if dx > 10 and dy > 10 then
-            
-            if e.scale > 1.1 then
-                ball.isVisible = true
-                if currentIndex < #images then
-                    currentIndex = currentIndex + 1
-                end
-    
+            -- Detectar o movimento de pinça
+            if scale > 1.1 and currentIndex < #images then
+                currentIndex = currentIndex + 1
                 changeImage(scene.view, currentIndex)
-            elseif e.scale < 0.9 then
-                if currentIndex > 1 then
-                    currentIndex = currentIndex - 1
-                end
-    
+            elseif scale < 0.9 and currentIndex > 1 then
+                currentIndex = currentIndex - 1
                 changeImage(scene.view, currentIndex)
             end
+
+            initialDistance = currentDistance
         end
-    elseif e.phase == "ended" or e.phase == "cancelled" then
-        -- Esconde a bola vermelha quando o gesto termina
-        ball.isVisible = false
+    elseif event.phase == "ended" or event.phase == "cancelled" then
+        -- Limpar os toques quando o gesto termina
+        if finger1 and event.id == finger1.id then
+            finger1 = nil
+        elseif finger2 and event.id == finger2.id then
+            finger2 = nil
+        end
+
+        -- Desativar o zoom se um ou ambos os toques forem levantados
+        if not finger1 or not finger2 then
+            isZooming = false
+        end
     end
-
     return true
-end 
+end
 
--- local function onKeyPress(event)
---     if event.phase == "down" then
---         if event.keyName == "up" then
-      
---             if currentIndex < #images then
---                 currentIndex = currentIndex + 1
---             end
-
---             changeImage(scene.view, currentIndex)
---         elseif event.keyName == "down" then
-
---             if currentIndex > 1 then
---                 currentIndex = currentIndex - 1
---             end
-
---             changeImage(scene.view, currentIndex)
---         end
---     end
---     return true
--- end
 
 local function resetScene()
     for i = 1, #images do
         images[i].isVisible = false
     end
-    
     images[1].isVisible = true
 end
 
-
 function scene:create(event)
     local sceneGroup = self.view
-    
+
     local capa = display.newImageRect(sceneGroup, "src/assets/pages/Pag1.png", 768, 1024)
     capa.x = display.contentCenterX
     capa.y = display.contentCenterY
 
-    images[1] = display.newImageRect(sceneGroup,"src/assets/page1/pandemia.png",425,425)
-    images[2] = display.newImageRect(sceneGroup,"src/assets/page1/epidemia.png",425,425)
-    images[3] = display.newImageRect(sceneGroup,"src/assets/page1/endemia.png",425,425)
-    
+    images[1] = display.newImageRect(sceneGroup, "src/assets/page1/pandemia.png", 425, 425)
+    images[2] = display.newImageRect(sceneGroup, "src/assets/page1/epidemia.png", 425, 425)
+    images[3] = display.newImageRect(sceneGroup, "src/assets/page1/endemia.png", 425, 425)
+
     for i = 1, #images do
         images[i].x = display.contentCenterX
         images[i].y = display.contentCenterY + 210
         images[i].isVisible = false
     end
 
-    changeImage(sceneGroup,currentIndex)
+    changeImage(sceneGroup, currentIndex)
 
     local nextBtn = button.new(
         display.contentCenterX + 300,
         display.contentCenterY + 480,
         "src/assets/controllers/nextButton.png",
         function()
-            composer.gotoScene("src.pages.page2")
+            composer.gotoScene("src.pages.page2", { effect = "slideLeft", time = 800 })
         end
     )
     sceneGroup:insert(nextBtn)
 
     local backBtn = button.new(
-        display.contentCenterX + -300,
+        display.contentCenterX - 300,
         display.contentCenterY + 480,
         "src/assets/controllers/backButton.png",
         function()
-            composer.gotoScene("src.pages.capa")
+            composer.gotoScene("src.pages.capa",{ effect = "slideRight", time = 800 })
         end
     )
     sceneGroup:insert(backBtn)
 
     local soundBtn = button.new(
-        display.contentCenterX + 0,
+        display.contentCenterX,
         display.contentCenterY + 480,
         "src/assets/controllers/soundButton.png",
         toggleAudio
     )
     sceneGroup:insert(soundBtn)
 
-    ball = display.newCircle(sceneGroup, display.contentWidth - 50, 50, 20)
-    ball:setFillColor(0, 0, 1) -- Cor vermelha
-    ball.isVisible = false
-
-    Runtime:addEventListener("touch", onPinch)
-   
+    Runtime:addEventListener("touch", onTouch)
 end
 
 function scene:destroy(event)
-    Runtime:removeEventListener("touch", onPinch)
+    Runtime:removeEventListener("touch", onTouch)
     audio.stop()
     audio.dispose(backgroundMusic)
     backgroundMusic = nil
@@ -172,8 +165,8 @@ end
 
 function scene:hide(event)
     if event.phase == "will" then
-        audio.stop() 
-        isPlaying = false 
+        audio.stop()
+        isPlaying = false
     end
 end
 

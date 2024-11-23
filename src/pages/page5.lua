@@ -88,7 +88,7 @@ function scene:create(event)
         display.contentCenterY + 480,
         "src/assets/controllers/nextButton.png",
         function()
-            composer.gotoScene("src.pages.contraCapa")
+            composer.gotoScene("src.pages.contraCapa", { effect = "slideLeft", time = 800 })
         end
     )
     sceneGroup:insert(nextBtn)
@@ -98,7 +98,7 @@ function scene:create(event)
         display.contentCenterY + 480,
         "src/assets/controllers/backButton.png",
         function()
-            composer.gotoScene("src.pages.page4")
+            composer.gotoScene("src.pages.page4",{ effect = "slideRight", time = 800 })
         end
     )
     sceneGroup:insert(backBtn)

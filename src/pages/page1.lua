@@ -11,6 +11,8 @@ local currentIndex = 1
 local audioHandle
 local isPlaying = false
 
+local texts = {}
+
 local backgroundMusic = audio.loadStream("src/assets/sounds/page1.mp3")
 
 local function toggleAudio()
@@ -39,6 +41,7 @@ local function changeImage(sceneGroup, index)
                     end
                 })
             end
+            texts[i].isVisible = true
         else
             if images[i].isVisible and images[i].alpha > 0 then
                 transition.to(images[i], {
@@ -49,6 +52,7 @@ local function changeImage(sceneGroup, index)
                     end
                 })
             end
+            texts[i].isVisible = false
         end
     end
 end
@@ -128,10 +132,41 @@ function scene:create(event)
     images[2] = display.newImageRect(sceneGroup, "src/assets/page1/epidemia1.png", 425, 425)
     images[3] = display.newImageRect(sceneGroup, "src/assets/page1/endemia1.png", 425, 425)
 
+    texts[1] = display.newText({
+        parent = sceneGroup,
+        text = "Pandemia",
+        x = display.contentCenterX,
+        y = display.contentCenterY + 380,
+        font = native.systemFontBold,
+        fontSize = 36
+    })
+    texts[1]:setFillColor(1, 1, 1) 
+
+    texts[2] = display.newText({
+        parent = sceneGroup,
+        text = "Epidemia",
+        x = display.contentCenterX,
+        y = display.contentCenterY + 380,
+        font = native.systemFontBold,
+        fontSize = 36
+    })
+    texts[2]:setFillColor(1, 1, 1) 
+
+    texts[3] = display.newText({
+        parent = sceneGroup,
+        text = "Endemia",
+        x = display.contentCenterX,
+        y = display.contentCenterY + 380,
+        font = native.systemFontBold,
+        fontSize = 36
+    })
+    texts[3]:setFillColor(1, 1, 1) 
+
     for i = 1, #images do
         images[i].x = display.contentCenterX
         images[i].y = display.contentCenterY + 210
         images[i].isVisible = false
+        texts[i].isVisible = false
     end
 
     changeImage(sceneGroup, currentIndex)

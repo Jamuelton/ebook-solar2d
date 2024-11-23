@@ -27,10 +27,32 @@ end
 
 local function changeImage(sceneGroup, index)
     for i = 1, #images do
-        images[i].isVisible = false
+        if i == index then
+            if not images[i].isVisible or images[i].alpha < 1 then
+                images[i].isVisible = true
+                images[i].alpha = 0
+                transition.to(images[i], {
+                    alpha = 1,
+                    time = 500,
+                    onComplete = function()
+                        images[i].isVisible = true
+                    end
+                })
+            end
+        else
+            if images[i].isVisible and images[i].alpha > 0 then
+                transition.to(images[i], {
+                    alpha = 0,
+                    time = 500,
+                    onComplete = function()
+                        images[i].isVisible = false
+                    end
+                })
+            end
+        end
     end
-    images[index].isVisible = true
 end
+
 
 local finger1, finger2
 local initialDistance
@@ -44,7 +66,6 @@ end
 
 local function onTouch(event)
     if event.phase == "began" then
-        -- Registrar os toques iniciais como finger1 e finger2
         if not finger1 then
             finger1 = event
         elseif not finger2 then
@@ -53,19 +74,17 @@ local function onTouch(event)
             initialDistance = calculateDistance(finger1.x, finger1.y, finger2.x, finger2.y)
         end
     elseif event.phase == "moved" and isZooming then
-        -- Atualizar a posição de finger1 e finger2 durante o movimento
         if finger1 and event.id == finger1.id then
             finger1 = event
         elseif finger2 and event.id == finger2.id then
             finger2 = event
         end
 
-        -- Verificar se finger1 e finger2 estão definidos antes de calcular a distância
         if finger1 and finger2 then
             local currentDistance = calculateDistance(finger1.x, finger1.y, finger2.x, finger2.y)
             local scale = currentDistance / initialDistance
 
-            -- Detectar o movimento de pinça
+
             if scale > 1.1 and currentIndex < #images then
                 currentIndex = currentIndex + 1
                 changeImage(scene.view, currentIndex)
@@ -77,14 +96,12 @@ local function onTouch(event)
             initialDistance = currentDistance
         end
     elseif event.phase == "ended" or event.phase == "cancelled" then
-        -- Limpar os toques quando o gesto termina
         if finger1 and event.id == finger1.id then
             finger1 = nil
         elseif finger2 and event.id == finger2.id then
             finger2 = nil
         end
 
-        -- Desativar o zoom se um ou ambos os toques forem levantados
         if not finger1 or not finger2 then
             isZooming = false
         end
@@ -107,9 +124,9 @@ function scene:create(event)
     capa.x = display.contentCenterX
     capa.y = display.contentCenterY
 
-    images[1] = display.newImageRect(sceneGroup, "src/assets/page1/pandemia.png", 425, 425)
-    images[2] = display.newImageRect(sceneGroup, "src/assets/page1/epidemia.png", 425, 425)
-    images[3] = display.newImageRect(sceneGroup, "src/assets/page1/endemia.png", 425, 425)
+    images[1] = display.newImageRect(sceneGroup, "src/assets/page1/pandemia1.png", 425, 425)
+    images[2] = display.newImageRect(sceneGroup, "src/assets/page1/epidemia1.png", 425, 425)
+    images[3] = display.newImageRect(sceneGroup, "src/assets/page1/endemia1.png", 425, 425)
 
     for i = 1, #images do
         images[i].x = display.contentCenterX

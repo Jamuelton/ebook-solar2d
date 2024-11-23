@@ -21,6 +21,31 @@ local isPlaying = false
 
 local backgroundMusic = audio.loadStream("src/assets/sounds/page2.mp3")
 
+local timeline
+local timelineFill
+
+
+local function updateTimelineFill(markerX)
+    
+    if timelineFill then
+        timelineFill:removeSelf()
+        timelineFill = nil
+    end
+
+    
+    timelineFill = display.newLine(timeline.x - timeline.width / 2, timeline.y, markerX, timeline.y)
+    timelineFill:setStrokeColor(1,0,0) 
+    timelineFill.strokeWidth = 10
+
+    for i = 1, #points do
+        if markerX >= points[i].x then
+            points[i]:setFillColor(1, 0, 0) 
+        else
+            points[i]:setFillColor(0.8, 0.8, 0.8) 
+        end
+    end
+end
+
 local function toggleAudio()
     if isPlaying == true then
         audio.stop(audioHandle)    
@@ -57,36 +82,40 @@ end
 
 local function timePoint(sceneGroup, x, y, index)
     local point = display.newCircle(sceneGroup, x, y, 10)
-    point:setFillColor(1, 0, 0)
+    point:setFillColor(0.8, 0.8, 0.8)
     point.index = index
     table.insert(points, point)
 end
 
 local function onChangeTime(e)
-
     marker = e.target
 
     if e.phase == "began" then
         display.getCurrentStage():setFocus(marker)
         marker.isFocus = true
     elseif e.phase == "moved" then
-        
+       
         if e.x >= points[1].x and e.x <= points[#points].x then
             marker.x = e.x
+            updateTimelineFill(marker.x)
         end
     elseif e.phase == "ended" or e.phase == "cancelled" then
-        
+      
         local closestPoint = points[1]
         for i = 1, #points do
             if math.abs(marker.x - points[i].x) < math.abs(marker.x - closestPoint.x) then
                 closestPoint = points[i]
             end
         end
-        
+
         
         marker.x = closestPoint.x
         currentIndex = closestPoint.index
         changePeriod(currentIndex)
+
+       
+        updateTimelineFill(marker.x)
+
         
         display.getCurrentStage():setFocus(nil)
         marker.isFocus = false
@@ -101,8 +130,8 @@ function scene:create(event)
     capa.x = display.contentCenterX
     capa.y = display.contentCenterY
 
-    local timeline = display.newRect(sceneGroup, display.contentCenterX, display.contentCenterY + 260, 600, 10)
-    timeline:setFillColor(255, 0, 0)
+    timeline = display.newRect(sceneGroup, display.contentCenterX, display.contentCenterY + 260, 600, 10)
+    timeline:setFillColor(0.8, 0.8, 0.8)
 
     local startX = timeline.x - (timeline.width / 2)
     local gap = timeline.width / 4
@@ -157,9 +186,10 @@ function scene:create(event)
     changePeriod(1)
 
     marker = display.newCircle(sceneGroup, points[1].x, timeline.y, 15)
-    marker:setFillColor(0, 0, 1)
-
+    marker:setFillColor(1, 0, 0) 
     marker:addEventListener("touch", onChangeTime)
+
+    updateTimelineFill(marker.x)
 
     local nextBtn = button.new(
         display.contentCenterX + 300,
@@ -206,11 +236,11 @@ end
 
 function scene:show(event)
     if event.phase == "did" then
-        -- Resetar para o primeiro índice
+        
         currentIndex = 1
         changePeriod(currentIndex)
 
-        -- Resetar o marcador para o ponto inicial
+        
         if marker and points[1] then
             marker.x = points[1].x
         end

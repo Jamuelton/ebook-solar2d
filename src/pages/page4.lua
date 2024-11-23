@@ -118,7 +118,7 @@ print(isMoving)
 function scene:create(event)
     local sceneGroup = self.view
     
-    local capa = display.newImageRect(sceneGroup, "src/assets/pages/Pag4.png", 768, 1024)
+    local capa = display.newImageRect(sceneGroup, "src/assets/pages/Pag41.png", 768, 1024)
     capa.x = display.contentCenterX
     capa.y = display.contentCenterY
 
@@ -153,7 +153,7 @@ function scene:create(event)
     table.insert(locations, hospital)
 
     local market = display.newImageRect(sceneGroup, "src/assets/page4/mercadoaberto.png", 120, 120)
-    market.x, market.y = display.contentCenterX , display.contentCenterY + 100
+    market.x, market.y = display.contentCenterX , display.contentCenterY + 140
     market.name = "market"
     market.isLocation = true
     physics.addBody(market, "static")

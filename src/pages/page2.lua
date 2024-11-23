@@ -14,6 +14,26 @@ local points = {}
 
 local currentIndex = 1
 
+local marker
+
+local audioHandle
+local isPlaying = false
+
+local backgroundMusic = audio.loadStream("src/assets/sounds/page2.mp3")
+
+local function toggleAudio()
+    if isPlaying == true then
+        audio.stop(audioHandle)    
+        backgroundMusic = nil
+        isPlaying = false
+    else
+        backgroundMusic = audio.loadStream("src/assets/sounds/page2.mp3")
+        audioHandle = audio.play(backgroundMusic)
+        isPlaying = true
+        
+    end
+end
+
 local function changePeriod(index)
     
     for i = 1, #images do
@@ -44,7 +64,7 @@ end
 
 local function onChangeTime(e)
 
-    local marker = e.target
+    marker = e.target
 
     if e.phase == "began" then
         display.getCurrentStage():setFocus(marker)
@@ -136,7 +156,7 @@ function scene:create(event)
 
     changePeriod(1)
 
-    local marker = display.newCircle(sceneGroup, points[1].x, timeline.y, 15)
+    marker = display.newCircle(sceneGroup, points[1].x, timeline.y, 15)
     marker:setFillColor(0, 0, 1)
 
     marker:addEventListener("touch", onChangeTime)
@@ -165,14 +185,42 @@ function scene:create(event)
         display.contentCenterX + 0,
         display.contentCenterY + 480,
         "src/assets/controllers/soundButton.png",
-        function()
-            composer.gotoScene("src.pages.page1")
-        end
+        toggleAudio
     )
     sceneGroup:insert(soundBtn)
    
 end
 
+function scene:destroy(e)
+    audio.stop()
+    audio.dispose(backgroundMusic)
+    backgroundMusic = nil
+end
+
+function scene:hide(event)
+    if event.phase == "will" then
+        audio.stop(audioHandle) 
+        isPlaying = false 
+    end
+end
+
+function scene:show(event)
+    if event.phase == "did" then
+        -- Resetar para o primeiro índice
+        currentIndex = 1
+        changePeriod(currentIndex)
+
+        -- Resetar o marcador para o ponto inicial
+        if marker and points[1] then
+            marker.x = points[1].x
+        end
+    end
+end
+
+
 scene:addEventListener("create", scene)
+scene:addEventListener("destroy", scene)
+scene:addEventListener("hide", scene)
+scene:addEventListener("show", scene)
 
 return scene

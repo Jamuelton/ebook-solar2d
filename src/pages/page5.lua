@@ -6,6 +6,24 @@ local button = require("src.components.button")
 
 local labImage, scientistImage, parkImage, centralImage
 
+local audioHandle
+local isPlaying = false
+
+local backgroundMusic = audio.loadStream("src/assets/sounds/page5.mp3")
+
+local function toggleAudio()
+    if isPlaying == true then
+        audio.stop(audioHandle)    
+        backgroundMusic = nil
+        isPlaying = false
+    else
+        backgroundMusic = audio.loadStream("src/assets/sounds/page5.mp3")
+        audioHandle = audio.play(backgroundMusic)
+        isPlaying = true
+        
+    end
+end
+
 
 local function resetScene()
     labImage.isVisible = true
@@ -89,9 +107,7 @@ function scene:create(event)
         display.contentCenterX + 0,
         display.contentCenterY + 480,
         "src/assets/controllers/soundButton.png",
-        function()
-            composer.gotoScene("src.pages.page1")
-        end
+        toggleAudio
     )
     sceneGroup:insert(soundBtn)
    
@@ -103,7 +119,22 @@ function scene:show(event)
     end
 end
 
+function scene:destroy(e)
+    audio.stop()
+    audio.dispose(backgroundMusic)
+    backgroundMusic = nil
+end
+
+function scene:hide(event)
+    if event.phase == "will" then
+        audio.stop(audioHandle) 
+        isPlaying = false 
+    end
+end
+
 scene:addEventListener("create", scene)
 scene:addEventListener("show", scene)
+scene:addEventListener("destroy", scene)
+scene:addEventListener("hide", scene)
 
 return scene

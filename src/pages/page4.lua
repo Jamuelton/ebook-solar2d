@@ -6,6 +6,28 @@ local physics = require("physics")
 
 local button = require("src.components.button")
 
+local isMoving = false
+
+local audioHandle
+local isPlaying = false
+
+local backgroundMusic = audio.loadStream("src/assets/sounds/page4.mp3")
+
+local function toggleAudio()
+    if isPlaying == true then
+        audio.stop(audioHandle)    
+        backgroundMusic = nil
+        isPlaying = false
+    else
+        backgroundMusic = audio.loadStream("src/assets/sounds/page4.mp3")
+        audioHandle = audio.play(backgroundMusic)
+        isPlaying = true
+        
+    end
+end
+
+
+
 physics.start()
 physics.setGravity(0, 0)
 
@@ -17,6 +39,7 @@ local minX, maxX = 50, display.contentWidth - 50
 local minY, maxY = display.contentCenterY + 50, display.contentHeight - 100 
 
 local function moveInfect()
+    if not isMoving then return end
     local randomX = math.random(minX, maxX)
     local randomY = math.random(minY, maxY)
     transition.to(infect, {
@@ -79,6 +102,19 @@ local function resetScene()
     infect.x, infect.y = display.contentCenterX, display.contentCenterY + 300
 end
 
+
+
+local function startMovement(event)
+    if event.phase == "began" and not isMoving then
+        isMoving = true 
+        moveInfect()
+        
+    end
+    return true 
+end
+
+print(isMoving)
+
 function scene:create(event)
     local sceneGroup = self.view
     
@@ -91,6 +127,8 @@ function scene:create(event)
     physics.addBody(infect, "dynamic", { radius = 15 })
     infect.isFixedRotation = true
     infect.isSensor = true
+
+    infect:addEventListener("touch", startMovement)
 
     for i = 1, 10 do
         local person = display.newImageRect(sceneGroup, "src/assets/page4/normal.png", 30, 50)
@@ -149,9 +187,7 @@ function scene:create(event)
         display.contentCenterX + 0,
         display.contentCenterY + 480,
         "src/assets/controllers/soundButton.png",
-        function()
-            composer.gotoScene("src.pages.page1")
-        end
+        toggleAudio
     )
     sceneGroup:insert(soundBtn)
    
@@ -159,6 +195,9 @@ end
 
 function scene:destroy(event)
     Runtime:removeEventListener("collision", onCollide)
+    audio.stop()
+    audio.dispose(backgroundMusic)
+    backgroundMusic = nil
 end
 
 function scene:show(event)
@@ -167,9 +206,16 @@ function scene:show(event)
     end
 end
 
+function scene:hide(event)
+    if event.phase == "will" then
+        audio.stop(audioHandle) 
+        isPlaying = false 
+    end
+end
 
 scene:addEventListener("show", scene)
 scene:addEventListener("create", scene)
 scene:addEventListener("destroy", scene)
+scene:addEventListener("hide", scene)
 
 return scene

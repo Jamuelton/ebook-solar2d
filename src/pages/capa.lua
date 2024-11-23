@@ -11,8 +11,6 @@ local backgroundMusic = audio.loadStream("src/assets/sounds/capa.mp3")
 
 local function toggleAudio()
     if isPlaying == true then
-        print("chamou igual a true")
-        print(isPlaying)
         audio.stop(audioHandle)    
         backgroundMusic = nil
         isPlaying = false

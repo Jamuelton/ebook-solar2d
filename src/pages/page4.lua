@@ -38,6 +38,11 @@ local locations = {}
 local minX, maxX = 50, display.contentWidth - 50 
 local minY, maxY = display.contentCenterY + 50, display.contentHeight - 100 
 
+local function stopMovement()
+    isMoving = false
+    transition.cancel(infect)
+end
+
 local function moveInfect()
     if not isMoving then return end
     local randomX = math.random(minX, maxX)
@@ -98,7 +103,7 @@ local function resetScene()
         location.isLocation = true 
     end
 
-    
+    stopMovement()
     infect.x, infect.y = display.contentCenterX, display.contentCenterY + 300
 end
 
@@ -161,6 +166,8 @@ function scene:create(event)
 
     moveInfect()
 
+   
+
     Runtime:addEventListener("collision", onCollide)
     
     local nextBtn = button.new(
@@ -203,11 +210,13 @@ end
 function scene:show(event)
     if event.phase == "will" then
         resetScene()
+        stopMovement()
     end
 end
 
 function scene:hide(event)
     if event.phase == "will" then
+        stopMovement()
         audio.stop() 
         isPlaying = false 
     end

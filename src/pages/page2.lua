@@ -126,7 +126,7 @@ end
 function scene:create(event)
     local sceneGroup = self.view
     
-    local capa = display.newImageRect(sceneGroup, "src/assets/pages/Pag2.png", 768, 1024)
+    local capa = display.newImageRect(sceneGroup, "src/assets/pages/Pag21.png", 768, 1024)
     capa.x = display.contentCenterX
     capa.y = display.contentCenterY
 

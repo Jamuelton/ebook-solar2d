@@ -51,8 +51,8 @@ local function onShake(e)
         
         if currentIndex < #images then
             currentIndex = currentIndex + 1
-        else
-            currentIndex = 1
+        -- else
+        --     currentIndex = 1
         end
         changeImage(scene.view, currentIndex)
     end
